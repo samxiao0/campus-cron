@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { Card } from '@/components/ui/card';
 import { Calendar as CalendarIcon, TrendingUp, BookOpen } from 'lucide-react';
@@ -6,9 +7,23 @@ import { Badge } from '@/components/ui/badge';
 export default function Calendar() {
   const attendanceRecords = useAppStore((state) => state.attendanceRecords);
   const subjects = useAppStore((state) => state.subjects);
-  const getAttendanceStats = useAppStore((state) => state.getAttendanceStats);
 
-  const stats = getAttendanceStats();
+  const stats = useMemo(() => {
+    const totalClasses = attendanceRecords.filter(r => r.status !== 'cancelled').length;
+    const presentClasses = attendanceRecords.filter(r => r.status === 'present').length;
+    const absentClasses = attendanceRecords.filter(r => r.status === 'absent').length;
+    const cancelledClasses = attendanceRecords.filter(r => r.status === 'cancelled').length;
+    
+    const percentage = totalClasses > 0 ? (presentClasses / totalClasses) * 100 : 0;
+
+    return {
+      totalClasses,
+      presentClasses,
+      absentClasses,
+      cancelledClasses,
+      percentage: Math.round(percentage * 100) / 100,
+    };
+  }, [attendanceRecords]);
 
   const getSubjectName = (subjectId: string) => {
     const subject = subjects.find(s => s.id === subjectId);

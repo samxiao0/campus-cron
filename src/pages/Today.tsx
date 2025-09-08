@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,8 +7,14 @@ import { cn } from '@/lib/utils';
 
 export default function Today() {
   const subjects = useAppStore((state) => state.subjects);
-  const todaySchedule = useAppStore((state) => state.getTodaySchedule());
+  const timetable = useAppStore((state) => state.timetable);
   const attendanceRecords = useAppStore((state) => state.attendanceRecords);
+  
+  const todaySchedule = useMemo(() => {
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+    const daySchedule = timetable.schedule.find(d => d.day === today);
+    return daySchedule?.timeSlots || [];
+  }, [timetable]);
   const markAttendance = useAppStore((state) => state.markAttendance);
   const clearAttendance = useAppStore((state) => state.clearAttendance);
 

@@ -18,10 +18,6 @@ interface AppState {
   // Attendance actions
   markAttendance: (date: string, day: string, timeSlotId: string, subjectId: string, status: 'present' | 'absent' | 'cancelled') => void;
   clearAttendance: (date: string, timeSlotId: string) => void;
-  
-  // Computed stats
-  getAttendanceStats: () => AttendanceStats;
-  getTodaySchedule: () => TimeSlot[];
 }
 
 const defaultTimeSlots: TimeSlot[] = [
@@ -135,31 +131,6 @@ export const useAppStore = create<AppState>()(
             r => !(r.date === date && r.timeSlotId === timeSlotId)
           ),
         }));
-      },
-
-      getAttendanceStats: () => {
-        const records = get().attendanceRecords;
-        const totalClasses = records.filter(r => r.status !== 'cancelled').length;
-        const presentClasses = records.filter(r => r.status === 'present').length;
-        const absentClasses = records.filter(r => r.status === 'absent').length;
-        const cancelledClasses = records.filter(r => r.status === 'cancelled').length;
-        
-        const percentage = totalClasses > 0 ? (presentClasses / totalClasses) * 100 : 0;
-
-        return {
-          totalClasses,
-          presentClasses,
-          absentClasses,
-          cancelledClasses,
-          percentage: Math.round(percentage * 100) / 100,
-        };
-      },
-
-      getTodaySchedule: () => {
-        const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-        const timetable = get().timetable;
-        const daySchedule = timetable.schedule.find(d => d.day === today);
-        return daySchedule?.timeSlots || [];
       },
     }),
     {

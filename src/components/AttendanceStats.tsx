@@ -1,9 +1,27 @@
+import { useMemo } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { Card } from '@/components/ui/card';
 import { TrendingUp, Calendar, BookOpen } from 'lucide-react';
 
 export const AttendanceStats = () => {
-  const stats = useAppStore((state) => state.getAttendanceStats());
+  const attendanceRecords = useAppStore((state) => state.attendanceRecords);
+  
+  const stats = useMemo(() => {
+    const totalClasses = attendanceRecords.filter(r => r.status !== 'cancelled').length;
+    const presentClasses = attendanceRecords.filter(r => r.status === 'present').length;
+    const absentClasses = attendanceRecords.filter(r => r.status === 'absent').length;
+    const cancelledClasses = attendanceRecords.filter(r => r.status === 'cancelled').length;
+    
+    const percentage = totalClasses > 0 ? (presentClasses / totalClasses) * 100 : 0;
+
+    return {
+      totalClasses,
+      presentClasses,
+      absentClasses,
+      cancelledClasses,
+      percentage: Math.round(percentage * 100) / 100,
+    };
+  }, [attendanceRecords]);
 
   const getPercentageColor = (percentage: number) => {
     if (percentage >= 75) return 'text-success';
