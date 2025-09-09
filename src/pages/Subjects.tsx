@@ -128,7 +128,7 @@ export default function Subjects() {
                   <div>
                     <h3 className="text-lg font-semibold text-foreground">{subject.name}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Added {subject.createdAt.toLocaleDateString()}
+                      Added {new Date(subject.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
