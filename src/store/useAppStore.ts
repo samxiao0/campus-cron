@@ -24,12 +24,13 @@ interface AppState {
 }
 
 const defaultTimeSlots: TimeSlot[] = [
-  { id: '1', startTime: '09:00', endTime: '10:00' },
-  { id: '2', startTime: '10:00', endTime: '11:00' },
-  { id: '3', startTime: '11:15', endTime: '12:15' },
-  { id: '4', startTime: '12:15', endTime: '13:15' },
-  { id: '5', startTime: '14:00', endTime: '15:00' },
-  { id: '6', startTime: '15:00', endTime: '16:00' },
+  { id: '1', startTime: '09:10', endTime: '10:00' },
+  { id: '2', startTime: '10:00', endTime: '10:50' },
+  { id: '3', startTime: '10:50', endTime: '11:40' },
+  { id: '4', startTime: '11:40', endTime: '12:30' },
+  { id: '5', startTime: '13:20', endTime: '14:10' },
+  { id: '6', startTime: '14:10', endTime: '15:00' },
+  { id: '7', startTime: '15:00', endTime: '15:50' },
 ];
 
 const defaultTimetable: Timetable = {
