@@ -72,14 +72,14 @@ export default function Settings() {
   };
 
   return (
-    <div className="space-y-6 pb-24">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
-        <p className="text-muted-foreground">Manage your app preferences</p>
+    <div className="space-y-4 sm:space-y-6 pb-20 sm:pb-24">
+      <div className="text-center px-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Settings</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">Manage your app preferences</p>
       </div>
 
       {/* App Info */}
-      <Card className="bg-gradient-card shadow-card border-0 p-6">
+      <Card className="bg-gradient-card shadow-card border-0 p-4 sm:p-6">
         <div className="flex items-center mb-4">
           <Info className="h-5 w-5 text-primary mr-2" />
           <h2 className="text-lg font-semibold text-foreground">App Information</h2>
@@ -101,40 +101,40 @@ export default function Settings() {
       </Card>
 
       {/* Data Management */}
-      <Card className="bg-gradient-card shadow-card border-0 p-6">
+      <Card className="bg-gradient-card shadow-card border-0 p-4 sm:p-6">
         <div className="flex items-center mb-4">
           <SettingsIcon className="h-5 w-5 text-primary mr-2" />
           <h2 className="text-lg font-semibold text-foreground">Data Management</h2>
         </div>
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-card rounded-lg border">
-            <div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-3 sm:p-4 bg-card rounded-lg border">
+            <div className="flex-1 min-w-0">
               <h3 className="font-medium text-foreground">Export Data</h3>
-              <p className="text-sm text-muted-foreground">Download a backup of all your data</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Download a backup of all your data</p>
             </div>
-            <Button variant="outline" onClick={exportData}>
+            <Button variant="outline" onClick={exportData} className="shrink-0 w-full sm:w-auto">
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
           </div>
           
-          <div className="flex items-center justify-between p-4 bg-card rounded-lg border">
-            <div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-3 sm:p-4 bg-card rounded-lg border">
+            <div className="flex-1 min-w-0">
               <h3 className="font-medium text-foreground">Import Data</h3>
-              <p className="text-sm text-muted-foreground">Restore data from a backup file</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Restore data from a backup file</p>
             </div>
-            <Button variant="outline" onClick={handleImportClick}>
+            <Button variant="outline" onClick={handleImportClick} className="shrink-0 w-full sm:w-auto">
               <Upload className="h-4 w-4 mr-2" />
               Import
             </Button>
           </div>
           
-          <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-destructive/20">
-            <div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-3 sm:p-4 bg-card rounded-lg border border-destructive/20">
+            <div className="flex-1 min-w-0">
               <h3 className="font-medium text-destructive">Clear All Data</h3>
-              <p className="text-sm text-muted-foreground">Permanently delete all subjects, timetables, and attendance records</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Permanently delete all subjects, timetables, and attendance records</p>
             </div>
-            <Button variant="outline" onClick={clearAllData} className="text-destructive hover:bg-destructive hover:text-destructive-foreground">
+            <Button variant="outline" onClick={clearAllData} className="shrink-0 w-full sm:w-auto text-destructive hover:bg-destructive hover:text-destructive-foreground">
               <Trash2 className="h-4 w-4 mr-2" />
               Clear
             </Button>
@@ -150,8 +150,30 @@ export default function Settings() {
         className="hidden"
       />
 
+      {/* Contact Information */}
+      <Card className="bg-gradient-card shadow-card border-0 p-4 sm:p-6">
+        <div className="flex items-center mb-4">
+          <Info className="h-5 w-5 text-primary mr-2" />
+          <h2 className="text-lg font-semibold text-foreground">Contact Developer</h2>
+        </div>
+        <div className="space-y-3 text-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <span className="text-muted-foreground">Phone:</span>
+            <a href="tel:+919951970441" className="font-medium text-primary hover:underline">+91 9951970441</a>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <span className="text-muted-foreground">Email:</span>
+            <a href="mailto:syedsame2244@gmail.com" className="font-medium text-primary hover:underline break-all">syedsame2244@gmail.com</a>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <span className="text-muted-foreground">Instagram:</span>
+            <a href="https://instagram.com/_samxiao" target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">@_samxiao</a>
+          </div>
+        </div>
+      </Card>
+
       {/* About */}
-      <Card className="bg-gradient-card shadow-card border-0 p-6 text-center">
+      <Card className="bg-gradient-card shadow-card border-0 p-4 sm:p-6 text-center">
         <h3 className="text-lg font-semibold text-foreground mb-2">Student Attendance Tracker</h3>
         <p className="text-muted-foreground text-sm">
           A simple and efficient way to track your class attendance and maintain academic records.
