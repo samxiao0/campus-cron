@@ -18,6 +18,9 @@ interface AppState {
   // Attendance actions
   markAttendance: (date: string, day: string, timeSlotId: string, subjectId: string, status: 'present' | 'absent' | 'cancelled') => void;
   clearAttendance: (date: string, timeSlotId: string) => void;
+  
+  // Import/Export actions
+  importData: (data: { subjects: Subject[]; timetable: Timetable; attendanceRecords: AttendanceRecord[]; }) => void;
 }
 
 const defaultTimeSlots: TimeSlot[] = [
@@ -131,6 +134,20 @@ export const useAppStore = create<AppState>()(
             r => !(r.date === date && r.timeSlotId === timeSlotId)
           ),
         }));
+      },
+
+      importData: (data) => {
+        // Ensure subjects have proper Date objects
+        const subjects = data.subjects.map(subject => ({
+          ...subject,
+          createdAt: new Date(subject.createdAt)
+        }));
+        
+        set({
+          subjects,
+          timetable: data.timetable,
+          attendanceRecords: data.attendanceRecords,
+        });
       },
     }),
     {

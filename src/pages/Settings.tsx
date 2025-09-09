@@ -3,11 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Settings as SettingsIcon, Download, Upload, Trash2, Info } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { toast } from 'sonner';
+import { useRef } from 'react';
 
 export default function Settings() {
   const subjects = useAppStore((state) => state.subjects);
   const timetable = useAppStore((state) => state.timetable);
   const attendanceRecords = useAppStore((state) => state.attendanceRecords);
+  const importData = useAppStore((state) => state.importData);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const exportData = () => {
     const data = {
@@ -28,6 +31,36 @@ export default function Settings() {
     URL.revokeObjectURL(url);
     
     toast.success('Data exported successfully!');
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      
+      // Validate the data structure
+      if (!data.subjects || !data.timetable || !data.attendanceRecords) {
+        throw new Error('Invalid backup file format');
+      }
+      
+      importData(data);
+      toast.success('Data imported successfully!');
+      
+      // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      toast.error('Failed to import data. Please check your backup file.');
+      console.error('Import error:', error);
+    }
   };
 
   const clearAllData = () => {
@@ -90,7 +123,7 @@ export default function Settings() {
               <h3 className="font-medium text-foreground">Import Data</h3>
               <p className="text-sm text-muted-foreground">Restore data from a backup file</p>
             </div>
-            <Button variant="outline" disabled>
+            <Button variant="outline" onClick={handleImportClick}>
               <Upload className="h-4 w-4 mr-2" />
               Import
             </Button>
@@ -108,6 +141,14 @@ export default function Settings() {
           </div>
         </div>
       </Card>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        onChange={handleFileChange}
+        className="hidden"
+      />
 
       {/* About */}
       <Card className="bg-gradient-card shadow-card border-0 p-6 text-center">
