@@ -135,6 +135,28 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'student-app-storage',
+      storage: {
+        getItem: (name) => {
+          const str = localStorage.getItem(name);
+          if (!str) return null;
+          
+          const data = JSON.parse(str);
+          // Convert string dates back to Date objects
+          if (data.state.subjects) {
+            data.state.subjects = data.state.subjects.map((subject: any) => ({
+              ...subject,
+              createdAt: new Date(subject.createdAt)
+            }));
+          }
+          return data;
+        },
+        setItem: (name, value) => {
+          localStorage.setItem(name, JSON.stringify(value));
+        },
+        removeItem: (name) => {
+          localStorage.removeItem(name);
+        },
+      },
     }
   )
 );
