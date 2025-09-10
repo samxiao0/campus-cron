@@ -2,8 +2,11 @@ import { useState, useMemo } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, X, Ban, RotateCcw, Clock } from 'lucide-react';
+import { Check, X, Ban, RotateCcw, Clock, CheckCheck, XCircle, Power, Eraser } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AttendanceStats } from '@/components/AttendanceStats';
+import { AttendancePredictor } from '@/components/AttendancePredictor';
+import { toast } from 'sonner';
 
 export default function Today() {
   const subjects = useAppStore((state) => state.subjects);
@@ -17,6 +20,7 @@ export default function Today() {
   }, [timetable]);
   const markAttendance = useAppStore((state) => state.markAttendance);
   const clearAttendance = useAppStore((state) => state.clearAttendance);
+  const markAllDayAttendance = useAppStore((state) => state.markAllDayAttendance);
 
   const today = new Date().toISOString().split('T')[0];
   const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
@@ -43,6 +47,12 @@ export default function Today() {
     clearAttendance(today, timeSlotId);
   };
 
+  const handleBulkAttendance = (status: 'present' | 'absent' | 'cancelled' | 'clear') => {
+    markAllDayAttendance(today, todayName, status);
+    const statusText = status === 'clear' ? 'cleared' : `marked as ${status}`;
+    toast.success(`All classes ${statusText} for today!`);
+  };
+
   const getStatusColor = (status?: string) => {
     switch (status) {
       case 'present': return 'bg-success text-success-foreground';
@@ -66,6 +76,11 @@ export default function Today() {
         </p>
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <AttendanceStats />
+        <AttendancePredictor />
+      </div>
+
       {todaySchedule.length === 0 ? (
         <Card className="bg-gradient-card shadow-card border-0 p-8 text-center">
           <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -73,8 +88,51 @@ export default function Today() {
           <p className="text-muted-foreground">Enjoy your day off!</p>
         </Card>
       ) : (
-        <div className="space-y-4">
-          {todaySchedule.map((slot) => {
+        <>
+          <Card className="bg-gradient-card shadow-card border-0 p-4">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <Button
+                onClick={() => handleBulkAttendance('present')}
+                size="sm"
+                className="bg-success hover:bg-success/90 text-success-foreground"
+              >
+                <CheckCheck className="h-4 w-4 mr-1" />
+                All Present
+              </Button>
+              
+              <Button
+                onClick={() => handleBulkAttendance('absent')}
+                size="sm"
+                className="bg-warning hover:bg-warning/90 text-warning-foreground"
+              >
+                <XCircle className="h-4 w-4 mr-1" />
+                All Absent
+              </Button>
+              
+              <Button
+                onClick={() => handleBulkAttendance('cancelled')}
+                size="sm"
+                className="bg-neutral hover:bg-neutral/90 text-neutral-foreground"
+              >
+                <Power className="h-4 w-4 mr-1" />
+                All Off
+              </Button>
+              
+              <Button
+                onClick={() => handleBulkAttendance('clear')}
+                variant="outline"
+                size="sm"
+                className="border-muted-foreground text-muted-foreground hover:bg-muted"
+              >
+                <Eraser className="h-4 w-4 mr-1" />
+                Clear All
+              </Button>
+            </div>
+          </Card>
+
+          <div className="space-y-4">
+            {todaySchedule.map((slot) => {
             const status = getAttendanceStatus(slot.id);
             const subjectName = getSubjectName(slot.subjectId);
             
@@ -143,7 +201,8 @@ export default function Today() {
               </Card>
             );
           })}
-        </div>
+          </div>
+        </>
       )}
     </div>
   );

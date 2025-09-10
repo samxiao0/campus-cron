@@ -18,6 +18,7 @@ interface AppState {
   // Attendance actions
   markAttendance: (date: string, day: string, timeSlotId: string, subjectId: string, status: 'present' | 'absent' | 'cancelled') => void;
   clearAttendance: (date: string, timeSlotId: string) => void;
+  markAllDayAttendance: (date: string, day: string, status: 'present' | 'absent' | 'cancelled' | 'clear') => void;
   
   // Import/Export actions
   importData: (data: { subjects: Subject[]; timetable: Timetable; attendanceRecords: AttendanceRecord[]; }) => void;
@@ -135,6 +136,40 @@ export const useAppStore = create<AppState>()(
             r => !(r.date === date && r.timeSlotId === timeSlotId)
           ),
         }));
+      },
+
+      markAllDayAttendance: (date, day, status) => {
+        const { timetable, subjects } = get();
+        const daySchedule = timetable.schedule.find(d => d.day === day);
+        
+        if (!daySchedule) return;
+
+        set((state) => {
+          let updatedRecords = [...state.attendanceRecords];
+          
+          if (status === 'clear') {
+            // Clear all attendance for this day
+            updatedRecords = updatedRecords.filter(r => r.date !== date);
+          } else {
+            // Remove existing records for this date
+            updatedRecords = updatedRecords.filter(r => r.date !== date);
+            
+            // Add new records for each time slot with a subject
+            daySchedule.timeSlots.forEach(slot => {
+              if (slot.subjectId) {
+                updatedRecords.push({
+                  date,
+                  day,
+                  timeSlotId: slot.id,
+                  subjectId: slot.subjectId,
+                  status: status as 'present' | 'absent' | 'cancelled',
+                });
+              }
+            });
+          }
+          
+          return { attendanceRecords: updatedRecords };
+        });
       },
 
       importData: (data) => {
