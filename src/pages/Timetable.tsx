@@ -118,51 +118,65 @@ export default function Timetable() {
           ))}
         </div>
       ) : (
-        <Card className="bg-gradient-card shadow-card border-0 p-4 sm:p-6">
-          <div className="flex items-center mb-4">
+        <Card className="bg-gradient-card shadow-card border-0 p-2 sm:p-6">
+          <div className="flex items-center mb-4 px-2 sm:px-0">
             <Clock className="h-5 w-5 mr-2 text-primary" />
             <h2 className="text-lg sm:text-xl font-semibold text-foreground">Weekly Schedule</h2>
           </div>
           
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[100px] sm:w-[120px]">Time</TableHead>
-                  {timetable.schedule.map((day) => (
-                    <TableHead key={day.day} className="text-center min-w-[100px] sm:min-w-[120px]">
-                      {day.day}
+          <div className="overflow-x-auto -mx-2 sm:mx-0">
+            <div className="min-w-[800px] px-2 sm:px-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[80px] sm:w-[100px] sticky left-0 bg-background z-10 border-r">
+                      <div className="text-xs sm:text-sm font-semibold">Time</div>
                     </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {timetable.schedule[0]?.timeSlots.map((_, slotIndex) => (
-                  <TableRow key={slotIndex}>
-                    <TableCell className="font-medium text-xs sm:text-sm">
-                      {timetable.schedule[0].timeSlots[slotIndex].startTime} - {timetable.schedule[0].timeSlots[slotIndex].endTime}
-                    </TableCell>
-                    {timetable.schedule.map((day) => {
-                      const slot = day.timeSlots[slotIndex];
-                      return (
-                        <TableCell key={`${day.day}-${slot.id}`} className="text-center p-2">
-                          <Badge
-                            variant="secondary"
-                            className="text-xs font-medium text-white w-full justify-center py-1"
-                            style={{
-                              backgroundColor: getSubjectColor(slot.subjectId),
-                              color: 'white'
-                            }}
-                          >
-                            {getSubjectName(slot.subjectId)}
-                          </Badge>
-                        </TableCell>
-                      );
-                    })}
+                    {timetable.schedule.map((day) => (
+                      <TableHead key={day.day} className="text-center min-w-[110px] sm:min-w-[130px] px-1 sm:px-4">
+                        <div className="text-xs sm:text-sm font-semibold">{day.day}</div>
+                      </TableHead>
+                    ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {timetable.schedule[0]?.timeSlots.map((_, slotIndex) => (
+                    <TableRow key={slotIndex} className="hover:bg-muted/50">
+                      <TableCell className="font-medium text-[10px] sm:text-sm sticky left-0 bg-background z-10 border-r py-3">
+                        <div className="whitespace-nowrap">
+                          {timetable.schedule[0].timeSlots[slotIndex].startTime}
+                          <br className="sm:hidden" />
+                          <span className="hidden sm:inline"> - </span>
+                          {timetable.schedule[0].timeSlots[slotIndex].endTime}
+                        </div>
+                      </TableCell>
+                      {timetable.schedule.map((day) => {
+                        const slot = day.timeSlots[slotIndex];
+                        return (
+                          <TableCell key={`${day.day}-${slot.id}`} className="text-center p-1 sm:p-2">
+                            <Badge
+                              variant="secondary"
+                              className="text-[10px] sm:text-xs font-medium text-white w-full justify-center py-1.5 sm:py-2 px-1 sm:px-2 whitespace-nowrap"
+                              style={{
+                                backgroundColor: getSubjectColor(slot.subjectId),
+                                color: 'white',
+                                minHeight: '28px',
+                                display: 'flex',
+                                alignItems: 'center'
+                              }}
+                            >
+                              <span className="truncate max-w-[90px] sm:max-w-none">
+                                {getSubjectName(slot.subjectId)}
+                              </span>
+                            </Badge>
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </Card>
       )}
