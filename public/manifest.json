@@ -1,8 +1,9 @@
 {
+   "id": ""https://samxiaoattendx.vercel.app",
   "name": "Student Attendance Tracker",
   "short_name": "Attendance",
   "description": "Track your class attendance easily with this modern student dashboard",
-  "start_url": "/",
+  "start_url": ""https://samxiaoattendx.vercel.app",
   "display": "standalone",
   "background_color": "#fcfcff",
   "theme_color": "#9333ea",
