@@ -63,16 +63,16 @@ export const AttendancePredictor = () => {
   };
 
   return (
-    <Card className="bg-gradient-card shadow-card border-0 p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-foreground">Attendance Predictor</h2>
-        <Calculator className="h-5 w-5 text-primary" />
+    <Card className="bg-gradient-card shadow-card border-0 p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-base font-semibold text-foreground">Monthly Predictor</h2>
+        <Calculator className="h-4 w-4 text-primary" />
       </div>
       
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div className="text-center">
-          <p className="text-sm text-muted-foreground mb-1">Current Monthly Average</p>
-          <p className={`text-2xl font-bold ${getStatusColor(predictions.currentPercentage)}`}>
+          <p className="text-xs text-muted-foreground mb-1">Current Monthly Average</p>
+          <p className={`text-xl font-bold ${getStatusColor(predictions.currentPercentage)}`}>
             {predictions.currentPercentage}%
           </p>
           <p className="text-xs text-muted-foreground">
@@ -82,35 +82,35 @@ export const AttendancePredictor = () => {
 
         {predictions.estimatedRemainingClasses > 0 && (
           <>
-            <div className="border-t pt-4">
-              <p className="text-sm text-muted-foreground mb-3">
-                Estimated {predictions.estimatedRemainingClasses} classes remaining this month
+            <div className="border-t pt-3">
+              <p className="text-xs text-muted-foreground mb-2 text-center">
+                ~{predictions.estimatedRemainingClasses} classes remaining this month
               </p>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-card p-4 rounded-lg border">
-                  <div className="flex items-center mb-2">
-                    <TrendingUp className="h-4 w-4 text-success mr-2" />
-                    <span className="font-medium text-success">75% Target</span>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-success/10 border border-success/20 p-3 rounded-lg">
+                  <div className="flex items-center mb-1">
+                    <TrendingUp className="h-3 w-3 text-success mr-1" />
+                    <span className="font-medium text-success text-xs">75%</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Need to attend: <span className="font-semibold text-foreground">{predictions.target75.needToAttend}</span> classes
+                  <p className="text-xs text-muted-foreground">
+                    Need: <span className="font-semibold text-foreground">{predictions.target75.needToAttend}</span>
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    Can miss: <span className="font-semibold text-foreground">{predictions.target75.canMiss}</span> classes
+                  <p className="text-xs text-muted-foreground">
+                    Can miss: <span className="font-semibold text-success">{predictions.target75.canMiss}</span>
                   </p>
                 </div>
                 
-                <div className="bg-card p-4 rounded-lg border">
-                  <div className="flex items-center mb-2">
-                    <TrendingUp className="h-4 w-4 text-primary mr-2" />
-                    <span className="font-medium text-primary">76% Target</span>
+                <div className="bg-primary/10 border border-primary/20 p-3 rounded-lg">
+                  <div className="flex items-center mb-1">
+                    <TrendingUp className="h-3 w-3 text-primary mr-1" />
+                    <span className="font-medium text-primary text-xs">76%</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Need to attend: <span className="font-semibold text-foreground">{predictions.target76.needToAttend}</span> classes
+                  <p className="text-xs text-muted-foreground">
+                    Need: <span className="font-semibold text-foreground">{predictions.target76.needToAttend}</span>
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    Can miss: <span className="font-semibold text-foreground">{predictions.target76.canMiss}</span> classes
+                  <p className="text-xs text-muted-foreground">
+                    Can miss: <span className="font-semibold text-primary">{predictions.target76.canMiss}</span>
                   </p>
                 </div>
               </div>

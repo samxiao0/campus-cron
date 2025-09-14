@@ -23,6 +23,7 @@ export default {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
           hover: "hsl(var(--primary-hover))",
+          light: "hsl(var(--primary-light))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -81,6 +82,8 @@ export default {
       },
       backgroundImage: {
         'gradient-primary': 'var(--gradient-primary)',
+        'gradient-secondary': 'var(--gradient-secondary)',
+        'gradient-warning': 'var(--gradient-warning)',
         'gradient-background': 'var(--gradient-background)',
         'gradient-card': 'var(--gradient-card)',
       },

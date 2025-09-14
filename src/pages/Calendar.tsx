@@ -1,40 +1,67 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/store/useAppStore';
 import { Card } from '@/components/ui/card';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Calendar as CalendarIcon, TrendingUp, BookOpen, Clock, CheckCircle, XCircle, Minus, X, RotateCcw } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Calendar as CalendarIcon, TrendingUp, BookOpen, Target, Award } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 
 export default function Calendar() {
+  const navigate = useNavigate();
   const attendanceRecords = useAppStore((state) => state.attendanceRecords);
   const subjects = useAppStore((state) => state.subjects);
-  const timetable = useAppStore((state) => state.timetable);
-  const markAttendance = useAppStore((state) => state.markAttendance);
-  const clearAttendance = useAppStore((state) => state.clearAttendance);
-  
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const stats = useMemo(() => {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    
+    // Overall stats
     const totalClasses = attendanceRecords.filter(r => r.status !== 'cancelled').length;
     const presentClasses = attendanceRecords.filter(r => r.status === 'present').length;
     const absentClasses = attendanceRecords.filter(r => r.status === 'absent').length;
     const cancelledClasses = attendanceRecords.filter(r => r.status === 'cancelled').length;
     
-    const percentage = totalClasses > 0 ? (presentClasses / totalClasses) * 100 : 0;
+    // Monthly stats
+    const monthlyRecords = attendanceRecords.filter(r => {
+      const recordDate = new Date(r.date);
+      return recordDate.getMonth() === currentMonth && recordDate.getFullYear() === currentYear;
+    });
+    
+    const monthlyTotal = monthlyRecords.filter(r => r.status !== 'cancelled').length;
+    const monthlyPresent = monthlyRecords.filter(r => r.status === 'present').length;
+    
+    const overallPercentage = totalClasses > 0 ? (presentClasses / totalClasses) * 100 : 0;
+    const monthlyPercentage = monthlyTotal > 0 ? (monthlyPresent / monthlyTotal) * 100 : 0;
+
+    // Subject-wise stats
+    const subjectStats = subjects.map(subject => {
+      const subjectRecords = attendanceRecords.filter(r => r.subjectId === subject.id && r.status !== 'cancelled');
+      const subjectPresent = attendanceRecords.filter(r => r.subjectId === subject.id && r.status === 'present');
+      const percentage = subjectRecords.length > 0 ? (subjectPresent.length / subjectRecords.length) * 100 : 0;
+      
+      return {
+        id: subject.id,
+        name: subject.name,
+        color: subject.color,
+        total: subjectRecords.length,
+        present: subjectPresent.length,
+        percentage: Math.round(percentage * 100) / 100,
+      };
+    });
 
     return {
       totalClasses,
       presentClasses,
       absentClasses,
       cancelledClasses,
-      percentage: Math.round(percentage * 100) / 100,
+      overallPercentage: Math.round(overallPercentage * 100) / 100,
+      monthlyPercentage: Math.round(monthlyPercentage * 100) / 100,
+      monthlyTotal,
+      monthlyPresent,
+      subjectStats,
     };
-  }, [attendanceRecords]);
+  }, [attendanceRecords, subjects]);
 
   const getSubjectName = (subjectId: string) => {
     const subject = subjects.find(s => s.id === subjectId);
@@ -51,46 +78,10 @@ export default function Calendar() {
   };
 
   const handleDateSelect = (date: Date | undefined) => {
-    setSelectedDate(date);
     if (date) {
-      setIsDialogOpen(true);
+      const dateString = format(date, 'yyyy-MM-dd');
+      navigate(`/calendar/${dateString}`);
     }
-  };
-
-  const getSelectedDaySchedule = () => {
-    if (!selectedDate) return [];
-    
-    const dayName = selectedDate.toLocaleDateString('en-US', { weekday: 'long' });
-    const daySchedule = timetable.schedule.find(d => d.day === dayName);
-    
-    if (!daySchedule) return [];
-    
-    return daySchedule.timeSlots.filter(slot => slot.subjectId);
-  };
-
-  const getAttendanceForDate = (timeSlotId: string) => {
-    if (!selectedDate) return null;
-    
-    const dateString = format(selectedDate, 'yyyy-MM-dd');
-    return attendanceRecords.find(
-      r => r.date === dateString && r.timeSlotId === timeSlotId
-    );
-  };
-
-  const handleAttendanceUpdate = (timeSlotId: string, subjectId: string, status: 'present' | 'absent' | 'cancelled') => {
-    if (!selectedDate) return;
-    
-    const dateString = format(selectedDate, 'yyyy-MM-dd');
-    const dayName = selectedDate.toLocaleDateString('en-US', { weekday: 'long' });
-    
-    markAttendance(dateString, dayName, timeSlotId, subjectId, status);
-  };
-
-  const handleClearAttendance = (timeSlotId: string) => {
-    if (!selectedDate) return;
-    
-    const dateString = format(selectedDate, 'yyyy-MM-dd');
-    clearAttendance(dateString, timeSlotId);
   };
 
   // Group records by date
@@ -112,153 +103,98 @@ export default function Calendar() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Card className="bg-gradient-card shadow-card border-0 p-4 text-center">
-          <div className="text-2xl font-bold text-success">{stats.presentClasses}</div>
-          <div className="text-sm text-muted-foreground">Present</div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Card className="bg-gradient-card shadow-card border-0 p-3 text-center">
+          <div className="text-xl font-bold text-success">{stats.presentClasses}</div>
+          <div className="text-xs text-muted-foreground">Present</div>
         </Card>
-        <Card className="bg-gradient-card shadow-card border-0 p-4 text-center">
-          <div className="text-2xl font-bold text-warning">{stats.absentClasses}</div>
-          <div className="text-sm text-muted-foreground">Absent</div>
+        <Card className="bg-gradient-card shadow-card border-0 p-3 text-center">
+          <div className="text-xl font-bold text-warning">{stats.absentClasses}</div>
+          <div className="text-xs text-muted-foreground">Absent</div>
         </Card>
-        <Card className="bg-gradient-card shadow-card border-0 p-4 text-center">
-          <div className="text-2xl font-bold text-neutral">{stats.cancelledClasses}</div>
-          <div className="text-sm text-muted-foreground">Cancelled</div>
+        <Card className="bg-gradient-card shadow-card border-0 p-3 text-center">
+          <div className="text-xl font-bold text-neutral">{stats.cancelledClasses}</div>
+          <div className="text-xs text-muted-foreground">Off</div>
         </Card>
-        <Card className="bg-gradient-card shadow-card border-0 p-4 text-center">
-          <div className="text-2xl font-bold text-primary">{stats.percentage.toFixed(1)}%</div>
-          <div className="text-sm text-muted-foreground">Average</div>
+        <Card className="bg-gradient-card shadow-card border-0 p-3 text-center">
+          <div className="text-xl font-bold text-primary">{stats.overallPercentage.toFixed(1)}%</div>
+          <div className="text-xs text-muted-foreground">Overall</div>
         </Card>
       </div>
 
+      {/* Monthly Stats */}
+      <Card className="bg-gradient-card shadow-card border-0 p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-semibold text-foreground">This Month</h3>
+          <Badge className="bg-primary/10 text-primary border-primary/20">
+            {new Date().toLocaleDateString('en-US', { month: 'long' })}
+          </Badge>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary">{stats.monthlyPercentage.toFixed(1)}%</div>
+            <div className="text-sm text-muted-foreground">Monthly Average</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-foreground">{stats.monthlyPresent}/{stats.monthlyTotal}</div>
+            <div className="text-sm text-muted-foreground">Classes Attended</div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Subject-wise Stats */}
+      <Card className="bg-gradient-card shadow-card border-0 p-4">
+        <div className="flex items-center mb-3">
+          <Target className="h-5 w-5 text-primary mr-2" />
+          <h3 className="text-lg font-semibold text-foreground">Subject Performance</h3>
+        </div>
+        <div className="space-y-3">
+          {stats.subjectStats.map((subject) => (
+            <div key={subject.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div 
+                  className="w-3 h-3 rounded-full" 
+                  style={{ backgroundColor: subject.color }}
+                />
+                <div>
+                  <div className="font-medium text-foreground text-sm">{subject.name}</div>
+                  <div className="text-xs text-muted-foreground">{subject.present}/{subject.total} classes</div>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Badge 
+                  className={`text-xs ${
+                    subject.percentage >= 75 
+                      ? 'bg-success text-success-foreground' 
+                      : subject.percentage >= 65
+                      ? 'bg-warning/20 text-warning-foreground border-warning'
+                      : 'bg-destructive/20 text-destructive border-destructive'
+                  }`}
+                >
+                  {subject.percentage.toFixed(1)}%
+                </Badge>
+                {subject.percentage >= 75 && <Award className="h-4 w-4 text-success" />}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
       {/* Interactive Calendar */}
-      <Card className="bg-gradient-card shadow-card border-0 p-6">
+      <Card className="bg-gradient-card shadow-card border-0 p-4">
         <div className="text-center mb-4">
-          <h2 className="text-xl font-semibold text-foreground mb-2">Select a Date</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-2">Select a Date</h2>
           <p className="text-sm text-muted-foreground">Click on a date to view and edit attendance</p>
         </div>
         <div className="flex justify-center">
           <CalendarComponent
             mode="single"
-            selected={selectedDate}
             onSelect={handleDateSelect}
             className="rounded-md border pointer-events-auto"
           />
         </div>
       </Card>
 
-      {/* Date Schedule Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="relative">
-            <DialogClose className="absolute right-0 top-0 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </DialogClose>
-            <DialogTitle className="text-center pr-8">
-              {selectedDate ? format(selectedDate, 'EEEE, MMMM d, yyyy') : 'Select Date'}
-            </DialogTitle>
-          </DialogHeader>
-          
-          {selectedDate && (
-            <div className="space-y-4">
-              {getSelectedDaySchedule().length === 0 ? (
-                <div className="text-center py-8">
-                  <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No classes scheduled for this day</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {getSelectedDaySchedule().map((timeSlot) => {
-                    const attendance = getAttendanceForDate(timeSlot.id);
-                    const subject = subjects.find(s => s.id === timeSlot.subjectId);
-                    
-                    return (
-                      <Card key={timeSlot.id} className="p-4 border">
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <h4 className="font-semibold text-foreground">
-                              {subject?.name || 'Unknown Subject'}
-                            </h4>
-                            <p className="text-sm text-muted-foreground">
-                              {timeSlot.startTime} - {timeSlot.endTime}
-                            </p>
-                          </div>
-                          {attendance && (
-                            <Badge className={getStatusColor(attendance.status)}>
-                              {attendance.status.charAt(0).toUpperCase() + attendance.status.slice(1)}
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        <TooltipProvider>
-                          <div className="flex gap-1 justify-center">
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleAttendanceUpdate(timeSlot.id, timeSlot.subjectId!, 'present')}
-                                  className="p-2 border-success hover:bg-success hover:text-success-foreground"
-                                >
-                                  <CheckCircle className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Present</TooltipContent>
-                            </Tooltip>
-                            
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleAttendanceUpdate(timeSlot.id, timeSlot.subjectId!, 'absent')}
-                                  className="p-2 border-warning hover:bg-warning hover:text-warning-foreground"
-                                >
-                                  <XCircle className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Absent</TooltipContent>
-                            </Tooltip>
-                            
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleAttendanceUpdate(timeSlot.id, timeSlot.subjectId!, 'cancelled')}
-                                  className="p-2 border-neutral hover:bg-neutral hover:text-neutral-foreground"
-                                >
-                                  <Minus className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Off</TooltipContent>
-                            </Tooltip>
-                            
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleClearAttendance(timeSlot.id)}
-                                  className="p-2"
-                                >
-                                  <RotateCcw className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Clear</TooltipContent>
-                            </Tooltip>
-                          </div>
-                        </TooltipProvider>
-                      </Card>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
 
       {/* Attendance History */}
       <div>
@@ -271,22 +207,25 @@ export default function Calendar() {
             <p className="text-muted-foreground">Start marking attendance to see your history here</p>
           </Card>
         ) : (
-          <div className="space-y-4">
-            {sortedDates.map((date) => {
+          <div className="space-y-3">
+            {sortedDates.slice(0, 10).map((date) => {
               const records = recordsByDate[date];
               const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
               const formattedDate = new Date(date).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
+                month: 'short',
                 day: 'numeric'
               });
 
               return (
-                <Card key={date} className="bg-gradient-card shadow-card border-0 p-6">
-                  <div className="flex items-center justify-between mb-4">
+                <Card 
+                  key={date} 
+                  className="bg-gradient-card shadow-card border-0 p-4 cursor-pointer hover:shadow-hover transition-all duration-200"
+                  onClick={() => handleDateSelect(new Date(date))}
+                >
+                  <div className="flex items-center justify-between mb-3">
                     <div>
-                      <h3 className="text-lg font-semibold text-foreground">{dayName}</h3>
-                      <p className="text-sm text-muted-foreground">{formattedDate}</p>
+                      <h3 className="text-base font-semibold text-foreground">{dayName}</h3>
+                      <p className="text-xs text-muted-foreground">{formattedDate}</p>
                     </div>
                     <div className="flex items-center space-x-2">
                       <TrendingUp className="h-4 w-4 text-primary" />
@@ -296,20 +235,25 @@ export default function Calendar() {
                     </div>
                   </div>
                   
-                  <div className="grid gap-2">
-                    {records.map((record, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-card rounded-lg border">
-                        <div className="flex items-center space-x-3">
-                          <BookOpen className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium text-foreground">
+                  <div className="grid gap-1">
+                    {records.slice(0, 3).map((record, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
+                        <div className="flex items-center space-x-2">
+                          <BookOpen className="h-3 w-3 text-muted-foreground" />
+                          <span className="font-medium text-foreground text-sm truncate">
                             {getSubjectName(record.subjectId)}
                           </span>
                         </div>
-                        <Badge className={getStatusColor(record.status)}>
-                          {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
+                        <Badge className={`${getStatusColor(record.status)} text-xs`}>
+                          {record.status.charAt(0).toUpperCase()}
                         </Badge>
                       </div>
                     ))}
+                    {records.length > 3 && (
+                      <div className="text-center text-xs text-muted-foreground mt-1">
+                        +{records.length - 3} more classes
+                      </div>
+                    )}
                   </div>
                 </Card>
               );

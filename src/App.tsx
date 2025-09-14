@@ -7,6 +7,7 @@ import { Layout } from "./components/Layout";
 import Today from "./pages/Today";
 import Timetable from "./pages/Timetable";
 import Calendar from "./pages/Calendar";
+import DateDetails from "./pages/DateDetails";
 import Subjects from "./pages/Subjects";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -24,6 +25,7 @@ const App = () => (
             <Route index element={<Today />} />
             <Route path="timetable" element={<Timetable />} />
             <Route path="calendar" element={<Calendar />} />
+            <Route path="calendar/:date" element={<DateDetails />} />
             <Route path="subjects" element={<Subjects />} />
             <Route path="settings" element={<Settings />} />
           </Route>
