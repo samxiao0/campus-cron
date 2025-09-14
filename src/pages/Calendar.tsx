@@ -2,9 +2,10 @@ import { useMemo, useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { Card } from '@/components/ui/card';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Calendar as CalendarIcon, TrendingUp, BookOpen, Clock, CheckCircle, XCircle, Minus } from 'lucide-react';
+import { Calendar as CalendarIcon, TrendingUp, BookOpen, Clock, CheckCircle, XCircle, Minus, X, RotateCcw } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 
@@ -148,9 +149,13 @@ export default function Calendar() {
 
       {/* Date Schedule Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-center">
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="relative">
+            <DialogClose className="absolute right-0 top-0 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </DialogClose>
+            <DialogTitle className="text-center pr-8">
               {selectedDate ? format(selectedDate, 'EEEE, MMMM d, yyyy') : 'Select Date'}
             </DialogTitle>
           </DialogHeader>
@@ -186,43 +191,65 @@ export default function Calendar() {
                           )}
                         </div>
                         
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleAttendanceUpdate(timeSlot.id, timeSlot.subjectId!, 'present')}
-                            className="flex-1 border-success hover:bg-success hover:text-success-foreground"
-                          >
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            Present
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleAttendanceUpdate(timeSlot.id, timeSlot.subjectId!, 'absent')}
-                            className="flex-1 border-warning hover:bg-warning hover:text-warning-foreground"
-                          >
-                            <XCircle className="h-4 w-4 mr-1" />
-                            Absent
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleAttendanceUpdate(timeSlot.id, timeSlot.subjectId!, 'cancelled')}
-                            className="flex-1 border-neutral hover:bg-neutral hover:text-neutral-foreground"
-                          >
-                            <Minus className="h-4 w-4 mr-1" />
-                            Off
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleClearAttendance(timeSlot.id)}
-                            className="px-3"
-                          >
-                            Clear
-                          </Button>
-                        </div>
+                        <TooltipProvider>
+                          <div className="flex gap-1 justify-center">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleAttendanceUpdate(timeSlot.id, timeSlot.subjectId!, 'present')}
+                                  className="p-2 border-success hover:bg-success hover:text-success-foreground"
+                                >
+                                  <CheckCircle className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Present</TooltipContent>
+                            </Tooltip>
+                            
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleAttendanceUpdate(timeSlot.id, timeSlot.subjectId!, 'absent')}
+                                  className="p-2 border-warning hover:bg-warning hover:text-warning-foreground"
+                                >
+                                  <XCircle className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Absent</TooltipContent>
+                            </Tooltip>
+                            
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleAttendanceUpdate(timeSlot.id, timeSlot.subjectId!, 'cancelled')}
+                                  className="p-2 border-neutral hover:bg-neutral hover:text-neutral-foreground"
+                                >
+                                  <Minus className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Off</TooltipContent>
+                            </Tooltip>
+                            
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleClearAttendance(timeSlot.id)}
+                                  className="p-2"
+                                >
+                                  <RotateCcw className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Clear</TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </TooltipProvider>
                       </Card>
                     );
                   })}
